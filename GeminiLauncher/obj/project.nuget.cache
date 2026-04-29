@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "zHVwaBKGI829T67zio4AdpRIliZ52sYWn4MsOSoIExjuAFtblXX1gwe8Ci0JqbjlGEJHiwUsK5BISLbbdppFDg==",
+  "dgSpecHash": "jr4KZ88lfOHy9ptYPXUMneWMt0fkMpclndFHIaK4VXdVHrdaC6YOd2c1Tt/MKZgcsXE9Cjg5kPAggApKJJUgyQ==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Linyizhi\\.gemini\\GeminiLauncher\\GeminiLauncher.csproj",
+  "projectFilePath": "D:\\360se6\\LYZL\\GeminiLauncher\\GeminiLauncher.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Linyizhi\\.nuget\\packages\\communitytoolkit.mvvm\\8.2.2\\communitytoolkit.mvvm.8.2.2.nupkg.sha512",
     "C:\\Users\\Linyizhi\\.nuget\\packages\\microsoft.web.webview2\\1.0.3719.77\\microsoft.web.webview2.1.0.3719.77.nupkg.sha512",

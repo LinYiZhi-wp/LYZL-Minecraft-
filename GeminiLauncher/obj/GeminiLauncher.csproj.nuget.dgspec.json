@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Linyizhi\\.gemini\\GeminiLauncher\\GeminiLauncher.csproj": {}
+    "D:\\360se6\\LYZL\\GeminiLauncher\\GeminiLauncher.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Linyizhi\\.gemini\\GeminiLauncher\\GeminiLauncher.csproj": {
+    "D:\\360se6\\LYZL\\GeminiLauncher\\GeminiLauncher.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Linyizhi\\.gemini\\GeminiLauncher\\GeminiLauncher.csproj",
+        "projectUniqueName": "D:\\360se6\\LYZL\\GeminiLauncher\\GeminiLauncher.csproj",
         "projectName": "LYZL",
-        "projectPath": "C:\\Users\\Linyizhi\\.gemini\\GeminiLauncher\\GeminiLauncher.csproj",
+        "projectPath": "D:\\360se6\\LYZL\\GeminiLauncher\\GeminiLauncher.csproj",
         "packagesPath": "C:\\Users\\Linyizhi\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Linyizhi\\.gemini\\GeminiLauncher\\obj\\",
+        "outputPath": "D:\\360se6\\LYZL\\GeminiLauncher\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Linyizhi\\AppData\\Roaming\\NuGet\\NuGet.Config"

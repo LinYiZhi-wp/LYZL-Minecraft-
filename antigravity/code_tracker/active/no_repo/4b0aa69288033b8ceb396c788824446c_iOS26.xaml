@@ -1,0 +1,474 @@
+∞À<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- iOS 26 Á£®Á†ÇÁéªÁíÉÂ±ÇÁ∫ßÔºà‰ªéÂÆûÂøÉÈªëËøõÂåñ‰∏∫ÈÄöÈÄèÊÑüÔºâ -->
+    <SolidColorBrush x:Key="iOS26.Background" Color="#40000000"/>               <!-- 25% Èªë - ÊúÄÂ∫ïÂ±ÇÔºåÈÄèÂá∫Â£ÅÁ∫∏ -->
+    <SolidColorBrush x:Key="iOS26.SidebarLayer" Color="#4D101014"/>             <!-- 30% ‰æßËæπÊ†è - ÊûÅÈÄöÈÄè -->
+    <SolidColorBrush x:Key="iOS26.ContentLayer" Color="#80181820"/>             <!-- 50% ÂÜÖÂÆπÂå∫ - ÂçäÈÄèÊòé -->
+    <SolidColorBrush x:Key="iOS26.FloatingLayer" Color="#B0202028"/>            <!-- 69% ÂºπÂá∫Â±Ç - Áï•Ê∑± -->
+    <SolidColorBrush x:Key="iOS26.CardLayer" Color="#30FFFFFF"/>                <!-- Âç°ÁâáÁéªÁíÉ - ÁôΩËâ≤ÂæÆÂÖâ -->
+    
+    <!-- Âº∫Ë∞ÉËâ≤ -->
+    <SolidColorBrush x:Key="iOS26.Accent" Color="#00E676"/>
+    <SolidColorBrush x:Key="iOS26.AccentHover" Color="#00FF80"/>
+    
+    <!-- ÂúÜËßíÂ∏∏Èáè -->
+    <CornerRadius x:Key="iOS26.CornerRadius.Large">16</CornerRadius>
+    <CornerRadius x:Key="iOS26.CornerRadius.Medium">12</CornerRadius>
+    <CornerRadius x:Key="iOS26.CornerRadius.Small">8</CornerRadius>
+    
+    <!-- Èò¥ÂΩ±ÊïàÊûú -->
+    <DropShadowEffect x:Key="iOS26.Shadow.Default" 
+                      BlurRadius="30" 
+                      ShadowDepth="5" 
+                      Opacity="0.25" 
+                      Color="Black"/>
+    
+    <DropShadowEffect x:Key="iOS26.Shadow.Glow" 
+                      BlurRadius="60" 
+                      ShadowDepth="0" 
+                      Opacity="0.7" 
+                      Color="#00E676"/>
+
+    <!-- HeroÊåâÈíÆÊ†∑Âºè -->
+    <Style x:Key="HeroButtonStyle" TargetType="Button">
+        <Setter Property="Height" Value="80"/>
+        <Setter Property="FontSize" Value="20"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="Background">
+            <Setter.Value>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#2ECC71" Offset="0"/>
+                    <GradientStop Color="#00E676" Offset="0.4"/>
+                    <GradientStop Color="#00C853" Offset="1"/>
+                </LinearGradientBrush>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Effect" Value="{StaticResource iOS26.Shadow.Glow}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}"
+                            CornerRadius="{StaticResource iOS26.CornerRadius.Large}"
+                            RenderTransformOrigin="0.5,0.5">
+                        <Border.RenderTransform>
+                            <ScaleTransform x:Name="ButtonScale"/>
+                        </Border.RenderTransform>
+                        <ContentPresenter HorizontalAlignment="Center" 
+                                        VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="ButtonScale"
+                                                       Storyboard.TargetProperty="ScaleX"
+                                                       To="1.02" Duration="0:0:0.15"/>
+                                        <DoubleAnimation Storyboard.TargetName="ButtonScale"
+                                                       Storyboard.TargetProperty="ScaleY"
+                                                       To="1.02" Duration="0:0:0.15"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="ButtonScale"
+                                                       Storyboard.TargetProperty="ScaleX"
+                                                       To="1.0" Duration="0:0:0.15"/>
+                                        <DoubleAnimation Storyboard.TargetName="ButtonScale"
+                                                       Storyboard.TargetProperty="ScaleY"
+                                                       To="1.0" Duration="0:0:0.15"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="ButtonScale"
+                                                       Storyboard.TargetProperty="ScaleX"
+                                                       To="0.98" Duration="0:0:0.05"/>
+                                        <DoubleAnimation Storyboard.TargetName="ButtonScale"
+                                                       Storyboard.TargetProperty="ScaleY"
+                                                       To="0.98" Duration="0:0:0.05"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- iOSÂç°ÁâáÊ†∑Âºè -->
+    <Style x:Key="iOS26.CardStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource iOS26.ContentLayer}"/>
+        <Setter Property="CornerRadius" Value="{StaticResource iOS26.CornerRadius.Large}"/>
+        <Setter Property="Effect" Value="{StaticResource iOS26.Shadow.Default}"/>
+    </Style>
+
+    <!-- NavigationViewItem ÊûúÂÜªÂä®ÁîªÊ†∑Âºè -->
+    <Style x:Key="JellyNavItemStyle" TargetType="{x:Type ContentPresenter}">
+        <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+        <Setter Property="RenderTransform">
+            <Setter.Value>
+                <ScaleTransform x:Name="NavItemScale" ScaleX="1" ScaleY="1"/>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Trigger.EnterActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(ScaleTransform.ScaleX)"
+                                           To="1.05" Duration="0:0:0.2">
+                                <DoubleAnimation.EasingFunction>
+                                    <BackEase EasingMode="EaseOut" Amplitude="0.3"/>
+                                </DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                            <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(ScaleTransform.ScaleY)"
+                                           To="1.05" Duration="0:0:0.2">
+                                <DoubleAnimation.EasingFunction>
+                                    <BackEase EasingMode="EaseOut" Amplitude="0.3"/>
+                                </DoubleAnimation.EasingFunction>
+                            </DoubleAnimation>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.EnterActions>
+                <Trigger.ExitActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(ScaleTransform.ScaleX)"
+                                           To="1.0" Duration="0:0:0.15"/>
+                            <DoubleAnimation Storyboard.TargetProperty="(RenderTransform).(ScaleTransform.ScaleY)"
+                                           To="1.0" Duration="0:0:0.15"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.ExitActions>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- iOSÂàÜÊÆµÊéßÂà∂Âô®Ê†∑Âºè (RadioButton) -->
+    <Style x:Key="SegmentRadioButtonStyle" TargetType="RadioButton">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="#80FFFFFF"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Padding" Value="10,6"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border x:Name="border" 
+                            Background="{TemplateBinding Background}" 
+                            CornerRadius="10"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="#40FFFFFF"/>
+                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="#20FFFFFF"/>
+                            <Setter Property="Foreground" Value="White"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- iOS Settings Group Style -->
+    <Style x:Key="iOS26.SettingsGroup" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource iOS26.ContentLayer}"/>
+        <Setter Property="CornerRadius" Value="{StaticResource iOS26.CornerRadius.Large}"/>
+        <Setter Property="Margin" Value="0,0,0,24"/>
+        <Setter Property="Padding" Value="0"/> <!-- Items handle padding -->
+        <Setter Property="Effect" Value="{StaticResource iOS26.Shadow.Default}"/>
+    </Style>
+
+    <!-- iOS Settings Item Container (Row) -->
+    <Style x:Key="iOS26.SettingsItem" TargetType="Border">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="MinHeight" Value="48"/>
+        <Setter Property="Padding" Value="16,12"/>
+        <Setter Property="BorderBrush" Value="#1AFFFFFF"/>
+        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+    </Style>
+
+    <!-- iOS Settings Item Title -->
+    <Style x:Key="iOS26.SettingsItem.Title" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+    </Style>
+
+    <!-- iOS Settings Item Value (Right side) -->
+    <Style x:Key="iOS26.SettingsItem.Value" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="Foreground" Value="#80FFFFFF"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="HorizontalAlignment" Value="Right"/>
+        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+        <Setter Property="Margin" Value="10,0,0,0"/>
+    </Style>
+    
+    <!-- iOS Settings Section Header -->
+    <Style x:Key="iOS26.SettingsSectionHeader" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="#80FFFFFF"/>
+        <Setter Property="Margin" Value="16,0,0,8"/>
+    </Style>
+
+    <!-- ============================================ -->
+    <!-- iOS26 Êâ©Â±ïÊ†∑Âºè: ÁéªÁíÉÂç°Áâá, ‰∫åÁ∫ßÊåâÈíÆ, ÊûúÂÜªÂä®Áîª -->
+    <!-- ============================================ -->
+
+    <!-- ÁéªÁíÉÊïàÊûúÂç°Áâá (Glassmorphism) -->
+    <Style x:Key="iOS26.GlassCard" TargetType="Border">
+        <Setter Property="Background" Value="#25FFFFFF"/>
+        <Setter Property="BorderBrush" Value="#30FFFFFF"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="{StaticResource iOS26.CornerRadius.Large}"/>
+        <Setter Property="Padding" Value="20"/>
+        <Setter Property="Effect" Value="{StaticResource iOS26.Shadow.Default}"/>
+    </Style>
+
+    <!-- ÊÇ¨ÊµÆÂç°Áâá (Â∏¶ hover ÊîæÂ§ßÊïàÊûú) -->
+    <Style x:Key="iOS26.HoverCard" TargetType="Border">
+        <Setter Property="Background" Value="#40252525"/>
+        <Setter Property="BorderBrush" Value="#60FFFFFF"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="{StaticResource iOS26.CornerRadius.Large}"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+        <Setter Property="RenderTransform">
+            <Setter.Value>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect BlurRadius="20" ShadowDepth="5" Opacity="0.3" Color="Black"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ‰∫åÁ∫ßÊåâÈíÆ (ÂçäÈÄèÊòé, Áî®‰∫éÊ¨°Ë¶ÅÊìç‰Ωú) -->
+    <Style x:Key="iOS26.SecondaryButton" TargetType="Button">
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="Padding" Value="20,0"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="Background" Value="#30FFFFFF"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="{StaticResource iOS26.CornerRadius.Medium}"
+                            Padding="{TemplateBinding Padding}"
+                            RenderTransformOrigin="0.5,0.5">
+                        <Border.RenderTransform>
+                            <ScaleTransform x:Name="BtnScale"/>
+                        </Border.RenderTransform>
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="#40FFFFFF"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="BtnScale"
+                                                       Storyboard.TargetProperty="ScaleX"
+                                                       To="0.95" Duration="0:0:0.08"/>
+                                        <DoubleAnimation Storyboard.TargetName="BtnScale"
+                                                       Storyboard.TargetProperty="ScaleY"
+                                                       To="0.95" Duration="0:0:0.08"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="BtnScale"
+                                                       Storyboard.TargetProperty="ScaleX"
+                                                       To="1.0" Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <BackEase EasingMode="EaseOut" Amplitude="0.4"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="BtnScale"
+                                                       Storyboard.TargetProperty="ScaleY"
+                                                       To="1.0" Duration="0:0:0.15">
+                                            <DoubleAnimation.EasingFunction>
+                                                <BackEase EasingMode="EaseOut" Amplitude="0.4"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ÊûúÂÜªÊåâÂéãÊåâÈíÆ (ÂºπÊÄßÂõûÂºπÊïàÊûú, Áî®‰∫é‰ªªÊÑè Button) -->
+    <Style x:Key="iOS26.JellyButton" TargetType="Button">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}"
+                            CornerRadius="{StaticResource iOS26.CornerRadius.Medium}"
+                            Padding="{TemplateBinding Padding}"
+                            RenderTransformOrigin="0.5,0.5">
+                        <Border.RenderTransform>
+                            <ScaleTransform x:Name="JellyScale"/>
+                        </Border.RenderTransform>
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <!-- Jelly press: scale down then spring back -->
+                        <Trigger Property="IsPressed" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="JellyScale"
+                                                       Storyboard.TargetProperty="ScaleX"
+                                                       To="0.92" Duration="0:0:0.06"/>
+                                        <DoubleAnimation Storyboard.TargetName="JellyScale"
+                                                       Storyboard.TargetProperty="ScaleY"
+                                                       To="0.92" Duration="0:0:0.06"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="JellyScale"
+                                                       Storyboard.TargetProperty="ScaleX"
+                                                       To="1.0" Duration="0:0:0.35">
+                                            <DoubleAnimation.EasingFunction>
+                                                <ElasticEase EasingMode="EaseOut" Oscillations="1" Springiness="5"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                        <DoubleAnimation Storyboard.TargetName="JellyScale"
+                                                       Storyboard.TargetProperty="ScaleY"
+                                                       To="1.0" Duration="0:0:0.35">
+                                            <DoubleAnimation.EasingFunction>
+                                                <ElasticEase EasingMode="EaseOut" Oscillations="1" Springiness="5"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ============================================ -->
+    <!--          È°µÈù¢ËΩ¨Âú∫Âä®Áîª Storyboards            -->
+    <!-- ============================================ -->
+
+    <!-- È°µÈù¢Ê∑°ÂÖ• + ‰∏äÊªë (Áî®‰∫é Page.Loaded) -->
+    <Storyboard x:Key="iOS26.PageSlideIn">
+        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                       From="0" To="1" Duration="0:0:0.4">
+            <DoubleAnimation.EasingFunction>
+                <CubicEase EasingMode="EaseOut"/>
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                       From="40" To="0" Duration="0:0:0.5">
+            <DoubleAnimation.EasingFunction>
+                <CubicEase EasingMode="EaseOut"/>
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!-- È°µÈù¢Ê∑°ÂÖ• + Áº©Êîæ (ÂºπÊÄßÊïàÊûú) -->
+    <Storyboard x:Key="iOS26.PageZoomIn">
+        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                       From="0" To="1" Duration="0:0:0.3"/>
+        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"
+                       From="0.95" To="1.0" Duration="0:0:0.4">
+            <DoubleAnimation.EasingFunction>
+                <BackEase EasingMode="EaseOut" Amplitude="0.2"/>
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"
+                       From="0.95" To="1.0" Duration="0:0:0.4">
+            <DoubleAnimation.EasingFunction>
+                <BackEase EasingMode="EaseOut" Amplitude="0.2"/>
+            </DoubleAnimation.EasingFunction>
+        </DoubleAnimation>
+    </Storyboard>
+
+    <!-- ============================================ -->
+    <!--              ÊñáÊú¨Ê†∑Âºè                         -->
+    <!-- ============================================ -->
+
+    <Style x:Key="iOS26.Text.Title" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="32"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="White"/>
+    </Style>
+
+    <Style x:Key="iOS26.Text.Subtitle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="Foreground" Value="#B0FFFFFF"/>
+    </Style>
+
+    <Style x:Key="iOS26.Text.Body" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Foreground" Value="#90FFFFFF"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+
+    <Style x:Key="iOS26.Text.Caption" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Foreground" Value="#60FFFFFF"/>
+    </Style>
+
+    <!-- ÂæΩÁ´†Ê†∑Âºè -->
+    <Style x:Key="iOS26.Badge" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource iOS26.Accent}"/>
+        <Setter Property="CornerRadius" Value="10"/>
+        <Setter Property="Padding" Value="8,3"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+    </Style>
+
+</ResourceDictionary>
+∂ *cascade08∂¬*cascade08¬» *cascade08»Ï*cascade08Ï® *cascade08®™*cascade08™± *cascade08±∏*cascade08∏π *cascade08πå*cascade08åç *cascade08çí*cascade08íì *cascade08ìö*cascade08öõ *cascade08õ§*cascade08§¶ *cascade08¶©*cascade08©™ *cascade08™Ø*cascade08Ø≤ *cascade08≤π*cascade08πƒ *cascade08ƒ≈*cascade08≈» *cascade08»⁄*cascade08⁄õ *cascade08õù*cascade08ùû *cascade08ûü*cascade08ü† *cascade08†£*cascade08£© *cascade08©≥*cascade08≥∏ *cascade08∏π*cascade08πº *cascade08ºÀ*cascade08Àê *cascade08êñ*cascade08ñó *cascade08óò*cascade08òô *cascade08ôú*cascade08úù *cascade08ùÂ*cascade08ÂÊ *cascade08ÊÎ*cascade08ÎÏ *cascade08Ï*cascade08Ò *cascade08Ò˙*cascade08˙¸ *cascade08¸Ö*cascade08Öä *cascade08äò*cascade08òù *cascade08ù©*cascade08©™ *cascade08™∏*cascade08∏ú *cascade08úù*cascade08ùÎ *cascade08ÎÏ*cascade08ÏÎ *cascade08Î˜*cascade08˜¯ *cascade08¯Ç*cascade08Çá *cascade08áπ*cascade08πª *cascade08ª«*cascade08«» *cascade08»Ë*cascade08ËÈ *cascade08ÈÍ*cascade08ÍÏ *cascade08ÏÙ*cascade08Ùı *cascade08ı˜*cascade08˜¯ *cascade08¯á*cascade08áà *cascade08àî*cascade08îï *cascade08ï™*cascade08™´ *cascade08´Æ*cascade08ÆØ *cascade08Øæ*cascade08æø *cascade08øÃ*cascade08ÃÕ *cascade08ÕÌ*cascade08Ì *cascade08é*cascade08éê *cascade08êË*cascade08Ë÷3 *cascade08÷3‰E*cascade08‰EúU*cascade08úUÌe *cascade08ÌeôÀ*cascade08ôÀ∞À *cascade082Bfile:///C:/Users/Linyizhi/.gemini/GeminiLauncher/Styles/iOS26.xaml

@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "dgSpecHash": "zHVwaBKGI829T67zio4AdpRIliZ52sYWn4MsOSoIExjuAFtblXX1gwe8Ci0JqbjlGEJHiwUsK5BISLbbdppFDg==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Linyizhi\\.gemini\\GeminiLauncher\\GeminiLauncher.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Linyizhi\\.nuget\\packages\\communitytoolkit.mvvm\\8.2.2\\communitytoolkit.mvvm.8.2.2.nupkg.sha512",
+    "C:\\Users\\Linyizhi\\.nuget\\packages\\microsoft.web.webview2\\1.0.3719.77\\microsoft.web.webview2.1.0.3719.77.nupkg.sha512",
+    "C:\\Users\\Linyizhi\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512",
+    "C:\\Users\\Linyizhi\\.nuget\\packages\\sharpziplib\\1.4.2\\sharpziplib.1.4.2.nupkg.sha512",
+    "C:\\Users\\Linyizhi\\.nuget\\packages\\system.codedom\\8.0.0\\system.codedom.8.0.0.nupkg.sha512",
+    "C:\\Users\\Linyizhi\\.nuget\\packages\\system.management\\8.0.0\\system.management.8.0.0.nupkg.sha512",
+    "C:\\Users\\Linyizhi\\.nuget\\packages\\wpf-ui\\3.0.4\\wpf-ui.3.0.4.nupkg.sha512"
+  ],
+  "logs": []
+}

@@ -11,7 +11,7 @@
             <Setter Property="Height" Value="45"/>
             <Setter Property="Margin" Value="0,0,0,8"/>
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
             <Setter Property="Padding" Value="15,0"/>
@@ -20,7 +20,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                         <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="16">
+                         <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="{StaticResource RadiusLarge}">
                              <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Left" Margin="{TemplateBinding Padding}"/>
                          </Border>
                     </ControlTemplate>
@@ -28,11 +28,11 @@
             </Setter>
             <Style.Triggers>
                 <Trigger Property="IsEnabled" Value="False">
-                    <Setter Property="Background" Value="#40FFFFFF"/>
-                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="Background" Value="{StaticResource GlassHeavyBrush}"/>
+                    <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
                 </Trigger>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#20FFFFFF"/>
+                    <Setter Property="Background" Value="{StaticResource GlassMediumBrush}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -45,7 +45,7 @@
                     <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.3"/>
                     <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="50" To="0" Duration="0:0:0.3">
                         <DoubleAnimation.EasingFunction>
-                            <QuadraticEase EasingMode="EaseOut"/>
+                            <CubicEase EasingMode="EaseOut"/>
                         </DoubleAnimation.EasingFunction>
                     </DoubleAnimation>
                 </Storyboard>
@@ -57,7 +57,7 @@
         <TranslateTransform/>
     </Page.RenderTransform>
 
-    <Border Background="{StaticResource iOS26.ContentLayer}" CornerRadius="36" Margin="20">
+    <Border Background="{StaticResource iOS26.ContentLayer}" CornerRadius="{StaticResource RadiusCard}" Margin="20">
         <Border.Effect><DropShadowEffect BlurRadius="40" ShadowDepth="0" Opacity="0.3" Color="Black"/></Border.Effect>
         <Grid>
             <Grid.RowDefinitions>
@@ -66,7 +66,7 @@
             </Grid.RowDefinitions>
 
             <!-- Title Bar -->
-            <Grid Grid.Row="0" Height="60" Background="#30FFFFFF">
+            <Grid Grid.Row="0" Height="60" Background="{StaticResource GlassStrongBrush}">
                 <!-- Make sure the top row background conforms to the 36 radius border -->
                 <Grid.Clip>
                     <RectangleGeometry Rect="0,0,10000,60" RadiusX="36" RadiusY="36"/>
@@ -77,12 +77,12 @@
                 </Grid.ColumnDefinitions>
                 
                 <Button Grid.Column="0" Content="←" Width="45" Height="45" Margin="10,0,0,0"
-                        FontSize="24" Background="Transparent" Foreground="White" BorderThickness="0"
+                        FontSize="24" Background="Transparent" Foreground="{StaticResource TextPrimaryBrush}" BorderThickness="0"
                         Click="BackButton_Click" Cursor="Hand" VerticalAlignment="Center"/>
                 
                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0">
-                    <TextBlock x:Name="TitleText" Text="版本设置" FontSize="20" FontWeight="SemiBold" Foreground="White"/>
-                    <TextBlock x:Name="SubtitleText" Text="Loading..." FontSize="12" Opacity="0.6" Foreground="White"/>
+                    <TextBlock x:Name="TitleText" Text="版本设置" FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}"/>
+                    <TextBlock x:Name="SubtitleText" Text="Loading..." FontSize="12" Opacity="0.6" Foreground="{StaticResource TextPrimaryBrush}"/>
                 </StackPanel>
             </Grid>
 
@@ -94,7 +94,7 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Left Tab Navigation -->
-                <Border Grid.Column="0" Background="#20FFFFFF" CornerRadius="24" Margin="10,0,0,10" Padding="15">
+                <Border Grid.Column="0" Background="{StaticResource GlassMediumBrush}" CornerRadius="{StaticResource RadiusXLarge}" Margin="10,0,0,10" Padding="15">
                     <StackPanel>
                         <Button x:Name="TabOverview" Content="📦 概览" Click="TabButton_Click" Tag="overview"
                                 Style="{StaticResource TabButtonStyle}" IsEnabled="False"/>

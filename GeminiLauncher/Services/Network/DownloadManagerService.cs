@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -54,8 +55,9 @@ namespace GeminiLauncher.Services.Network
                 }
 
                 activeTaskCount++;
-                long delta = task.DownloadedBytes - task.LastDownloadedBytes;
-                task.LastDownloadedBytes = task.DownloadedBytes;
+                long currentBytes = task.DownloadedBytes;
+                long delta = currentBytes - task.LastDownloadedBytes;
+                task.LastDownloadedBytes = currentBytes;
                 totalDelta += delta;
 
                 if (delta < 1024) task.SpeedText = $"{delta} B/s";
@@ -89,21 +91,33 @@ namespace GeminiLauncher.Services.Network
         public async Task EnqueueGenericDownload(string name, string url, string destination)
         {
             var task = new DownloadTask { Name = name, Status = "Pending..." };
-            ActiveTasks.Add(task);
+            
+            // Ensure UI thread access for ObservableCollection
+            if (Application.Current?.Dispatcher != null && !Application.Current.Dispatcher.CheckAccess())
+            {
+                await Application.Current.Dispatcher.InvokeAsync(() => ActiveTasks.Add(task));
+            }
+            else
+            {
+                ActiveTasks.Add(task);
+            }
             
             try
             {
                 task.Status = "Downloading...";
+                Debug.WriteLine($"[DownloadManager] Starting download: {name} from {url} to {destination}");
                 await _downloadService.DownloadFileAsync(url, destination, null, new Progress<long>(bytes => task.IncrementBytes(bytes)), task.Cts.Token);
                 task.Status = "Completed";
                 task.IsCompleted = true;
                 task.Progress = 1.0;
+                Debug.WriteLine($"[DownloadManager] Download completed: {name}");
             }
             catch (Exception ex)
             {
                 task.Status = "Failed";
                 task.IsFailed = true;
                 task.ErrorMessage = ex.Message;
+                Debug.WriteLine($"[DownloadManager] Download failed: {name}, Error: {ex.Message}");
             }
         }
 
@@ -151,8 +165,6 @@ namespace GeminiLauncher.Services.Network
                 task.Status = "Failed";
                 task.IsFailed = true;
                 task.ErrorMessage = ex.Message;
-                // Only show message box on final failure
-                MessageBox.Show($"Download failed permanently: {ex.Message}");
             }
         }
 
@@ -168,6 +180,16 @@ namespace GeminiLauncher.Services.Network
             task.JsonStatus = "下载中...";
             task.JsonStatusText = "version.json";
             string jsonUrl = ReplaceSource(version.Url, source);
+            if (string.IsNullOrEmpty(jsonUrl))
+            {
+                jsonUrl = source switch
+                {
+                    "BMCLAPI" => $"https://bmclapi2.bangbang93.com/v1/packages/{version.Id}/{version.Id}.json",
+                    "FastMirror" => $"https://download.fastmirror.net/v1/packages/{version.Id}/{version.Id}.json",
+                    "MCMirror" => $"https://mirrors.mcfx.net/v1/packages/{version.Id}/{version.Id}.json",
+                    _ => $"https://piston-meta.mojang.com/v1/packages/{version.Id}/{version.Id}.json"
+                };
+            }
             string jsonPath = Path.Combine(versionDir, $"{version.Id}.json");
             await _downloadService.DownloadFileAsync(jsonUrl, jsonPath, null, null, task.Cts.Token);
             task.JsonProgress = 1.0;

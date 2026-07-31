@@ -38,7 +38,9 @@ namespace GeminiLauncher.Services.Network
             var handler = new SocketsHttpHandler
             {
                 PooledConnectionLifetime = TimeSpan.FromMinutes(2),
-                MaxConnectionsPerServer = maxConcurrency
+                MaxConnectionsPerServer = maxConcurrency,
+                ConnectTimeout = TimeSpan.FromSeconds(30),
+                AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate
             };
             _httpClient = new HttpClient(handler);
             _httpClient.Timeout = TimeSpan.FromMinutes(5);
@@ -100,6 +102,9 @@ namespace GeminiLauncher.Services.Network
         
         private async Task DownloadInternalAsync(string url, string finalPath, string partialPath, IProgress<long>? progress, CancellationToken ct)
         {
+            if (string.IsNullOrWhiteSpace(url) || !Uri.IsWellFormedUriString(url, UriKind.Absolute))
+                throw new ArgumentException($"无效的下载URL: {(url ?? "空")}");
+
             long startOffset = 0;
             if (File.Exists(partialPath))
             {

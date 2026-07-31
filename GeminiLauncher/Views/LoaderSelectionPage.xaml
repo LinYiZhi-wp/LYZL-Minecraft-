@@ -388,39 +388,54 @@
             </DockPanel>
         </Border>
 
-        <!-- Download Progress Overlay -->
-        <Border Grid.RowSpan="3" Background="#C0000000"
-                Visibility="{Binding IsDownloading, Converter={StaticResource BooleanToVisibilityConverter}}"
-                Panel.ZIndex="100">
-            <Border Width="380" CornerRadius="20" Background="#1C1C24"
-                    BorderBrush="#25FFFFFF" BorderThickness="1"
-                    Effect="{StaticResource CardShadow}">
-                <Border.RenderTransform>
-                    <ScaleTransform ScaleX="0.92" ScaleY="0.92"/>
-                </Border.RenderTransform>
-                <StackPanel Margin="32,28,32,28">
-                    <TextBlock Text="正在下载" FontSize="18" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
-                    <TextBlock Text="{Binding DownloadStatus}" FontSize="12" Foreground="#80FFFFFF" HorizontalAlignment="Center" Margin="0,6,0,0"/>
-
-                    <ProgressBar Value="{Binding DownloadProgress}" Maximum="1.0" Height="4" Margin="0,20,0,0"
-                                 Background="#20FFFFFF" Foreground="#00E676">
-                        <ProgressBar.Resources>
-                            <Style TargetType="Border">
-                                <Setter Property="CornerRadius" Value="2"/>
-                            </Style>
-                        </ProgressBar.Resources>
-                    </ProgressBar>
-
-                    <TextBlock Text="{Binding DownloadProgress, StringFormat='{}{0:P0}'}"
-                               FontSize="12" Foreground="#00E676" HorizontalAlignment="Center" Margin="0,8,0,0"/>
-
-                    <Button Content="后台运行" Margin="0,16,0,0"
-                            Style="{StaticResource iOS26.SecondaryButton}"
-                            HorizontalAlignment="Stretch" Height="36" FontSize="13"
-                            Foreground="#B0FFFFFF"
-                            Click="MinimizeDownload_Click"/>
+        <!-- Download Progress Capsule -->
+        <Border x:Name="DownloadCapsule" Grid.RowSpan="3" Panel.ZIndex="100"
+                VerticalAlignment="Bottom" HorizontalAlignment="Center"
+                Margin="0,0,0,70"
+                Opacity="0"
+                CornerRadius="14" Background="#C8181818" BorderBrush="#20FFFFFF" BorderThickness="1" Padding="16,10">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsDownloading}" Value="True">
+                            <DataTrigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                         From="0" To="1" Duration="0:0:0.3">
+                                            <DoubleAnimation.EasingFunction>
+                                                <CubicEase EasingMode="EaseOut"/>
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.EnterActions>
+                            <DataTrigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                         From="1" To="0" Duration="0:0:0.4"
+                                                         BeginTime="0:0:1"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.ExitActions>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Border Width="24" Height="24" CornerRadius="8" Background="#2000E676" Margin="0,0,10,0">
+                    <TextBlock Text="⬇" FontSize="12" FontWeight="Bold"
+                               Foreground="#00E676" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="开始安装" FontSize="12" FontWeight="SemiBold" Foreground="White"/>
+                    <TextBlock Text="{Binding DownloadStatus}" FontSize="10" Foreground="#70FFFFFF" Margin="0,1,0,0"/>
                 </StackPanel>
-            </Border>
+                <ProgressBar Width="60" Height="3" Background="#20FFFFFF" Foreground="#00E676"
+                             BorderThickness="0" VerticalAlignment="Center" Margin="12,0,0,0"
+                             Value="{Binding DownloadProgress}" Maximum="1" Minimum="0"/>
+            </StackPanel>
         </Border>
     </Grid>
 </Page>

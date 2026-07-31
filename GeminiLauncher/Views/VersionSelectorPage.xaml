@@ -13,7 +13,7 @@
                     <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.3"/>
                     <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" From="50" To="0" Duration="0:0:0.3">
                         <DoubleAnimation.EasingFunction>
-                            <QuadraticEase EasingMode="EaseOut"/>
+                            <CubicEase EasingMode="EaseOut"/>
                         </DoubleAnimation.EasingFunction>
                     </DoubleAnimation>
                 </Storyboard>
@@ -25,7 +25,7 @@
         <TranslateTransform/>
     </Page.RenderTransform>
 
-    <Border Background="{StaticResource iOS26.ContentLayer}" CornerRadius="36" Margin="20">
+    <Border Background="{StaticResource iOS26.ContentLayer}" CornerRadius="{StaticResource RadiusCard}" Margin="20">
         <Border.Effect><DropShadowEffect BlurRadius="40" ShadowDepth="0" Opacity="0.3" Color="Black"/></Border.Effect>
         <Grid>
             <Grid.RowDefinitions>
@@ -92,7 +92,7 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Folder Panel -->
-                <Border x:Name="FolderPanel" Grid.Column="0" Width="220" Background="#20FFFFFF" CornerRadius="24" Padding="10" Margin="0,0,20,0" Visibility="Collapsed">
+                <Border x:Name="FolderPanel" Grid.Column="0" Width="220" Background="{StaticResource GlassMediumBrush}" CornerRadius="{StaticResource RadiusXLarge}" Padding="10" Margin="0,0,20,0" Visibility="Collapsed">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>

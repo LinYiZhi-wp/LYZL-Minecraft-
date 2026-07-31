@@ -11,13 +11,13 @@ namespace GeminiLauncher.Services
 {
     public class PreloadTask
     {
-        public string Name { get; set; }
-        public string Description { get; set; }
+        public string Name { get; set; } = null!;
+        public string Description { get; set; } = null!;
         public double Weight { get; set; } = 1.0;
-        public Func<CancellationToken, Task> Action { get; set; }
+        public Func<CancellationToken, Task> Action { get; set; } = null!;
         public bool IsCompleted { get; private set; }
         public bool HasError { get; private set; }
-        public string ErrorMessage { get; private set; }
+        public string? ErrorMessage { get; private set; }
 
         internal async Task ExecuteAsync(CancellationToken ct)
         {
@@ -48,7 +48,7 @@ namespace GeminiLauncher.Services
 
     public class PreloadProgressEventArgs : EventArgs
     {
-        public string CurrentTask { get; set; }
+        public string CurrentTask { get; set; } = "";
         public int CompletedTasks { get; set; }
         public int TotalTasks { get; set; }
         public double OverallProgress { get; set; }
@@ -58,12 +58,12 @@ namespace GeminiLauncher.Services
     public static class PreloadService
     {
         private static readonly List<PreloadTask> _tasks = new();
-        private static CancellationTokenSource _cts;
+        private static CancellationTokenSource? _cts;
         private static int _completedCount;
         private static double _totalWeight;
         private static bool _isRunning;
 
-        public static event EventHandler<PreloadProgressEventArgs> ProgressChanged;
+        public static event EventHandler<PreloadProgressEventArgs>? ProgressChanged;
         public static event Action? BackgroundReady;
 
         public static bool IsPreloaded => _tasks.All(t => t.IsCompleted) && !_isRunning;
@@ -201,13 +201,13 @@ namespace GeminiLauncher.Services
         #region Cached Data
 
         private static readonly object _cacheLock = new object();
-        private static volatile System.Windows.Media.ImageSource _cachedBackground;
+        private static volatile System.Windows.Media.ImageSource? _cachedBackground;
         private static volatile List<GameInstance> _cachedVersions = new();
         private static volatile List<DownloadableVersion> _cachedVersionList = new();
         private static volatile List<ModProject> _cachedTrendingMods = new();
         private static volatile List<ModProject> _cachedNewestMods = new();
 
-        public static System.Windows.Media.ImageSource CachedBackground => _cachedBackground;
+        public static System.Windows.Media.ImageSource? CachedBackground => _cachedBackground;
         public static List<GameInstance> CachedVersions { get { lock (_cacheLock) { return _cachedVersions; } } }
         public static List<DownloadableVersion> CachedVersionList { get { lock (_cacheLock) { return _cachedVersionList; } } }
         public static List<ModProject> CachedTrendingMods { get { lock (_cacheLock) { return _cachedTrendingMods; } } }

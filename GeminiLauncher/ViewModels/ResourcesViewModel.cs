@@ -1,17 +1,47 @@
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GeminiLauncher.Models.Ecosystem;
 using GeminiLauncher.Services.Ecosystem;
 using GeminiLauncher.Services;
+using GeminiLauncher.Services.Network;
 using GeminiLauncher.Controls;
 
 namespace GeminiLauncher.ViewModels
 {
+    public class LocalModFile : ObservableObject
+    {
+        private string _fileName = string.Empty;
+        private string _filePath = string.Empty;
+        private string _fileType = string.Empty;
+        private long _fileSize;
+        private bool _isEnabled = true;
+        private System.Windows.Media.ImageSource? _previewImage;
+
+        public string FileName { get => _fileName; set => SetProperty(ref _fileName, value); }
+        public string FilePath { get => _filePath; set => SetProperty(ref _filePath, value); }
+        public string FileType { get => _fileType; set => SetProperty(ref _fileType, value); }
+        public long FileSize { get => _fileSize; set => SetProperty(ref _fileSize, value); }
+        public bool IsEnabled { get => _isEnabled; set => SetProperty(ref _isEnabled, value); }
+        public System.Windows.Media.ImageSource? PreviewImage { get => _previewImage; set => SetProperty(ref _previewImage, value); }
+
+        public string FileSizeDisplay
+        {
+            get
+            {
+                if (_fileSize < 1024) return $"{_fileSize} B";
+                if (_fileSize < 1024 * 1024) return $"{_fileSize / 1024.0:F1} KB";
+                return $"{_fileSize / (1024.0 * 1024.0):F1} MB";
+            }
+        }
+    }
+
     public partial class ResourcesViewModel : ObservableObject
     {
         private readonly ModrinthService _modrinthService;
@@ -19,6 +49,7 @@ namespace GeminiLauncher.ViewModels
         private readonly ConfigService _configService;
         private CancellationTokenSource? _searchDebounceCts;
         private CancellationTokenSource? _featuredLoadCts;
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, Task<ResourceDetail?>> _preloadCache = new();
 
         [ObservableProperty]
         private string _searchQuery = string.Empty;
@@ -45,6 +76,11 @@ namespace GeminiLauncher.ViewModels
         private string _selectedCategory = "mod";
 
         [ObservableProperty]
+        private string? _selectedGameVersion;
+
+        public ObservableCollection<string> GameVersions { get; } = new() { "1.21", "1.20", "1.19", "1.18", "1.17", "1.16", "1.12" };
+
+        [ObservableProperty]
         private bool _isFullPageView;
 
         [ObservableProperty]
@@ -53,9 +89,17 @@ namespace GeminiLauncher.ViewModels
         [ObservableProperty]
         private bool _isSearchEmpty;
 
+        [ObservableProperty]
+        private bool _isLocalModPanelOpen;
+
+        [ObservableProperty]
+        private LocalModFile? _selectedLocalMod;
+
         public ObservableCollection<ModProject> SearchResults { get; } = new ObservableCollection<ModProject>();
         public ObservableCollection<ModProject> TrendingMods { get; } = new ObservableCollection<ModProject>();
         public ObservableCollection<ModProject> NewestMods { get; } = new ObservableCollection<ModProject>();
+        public ObservableCollection<LocalModFile> LocalMods { get; } = new ObservableCollection<LocalModFile>();
+        public ObservableCollection<string> InstalledMods { get; } = new ObservableCollection<string>();
 
         public ResourcesViewModel()
         {
@@ -69,11 +113,12 @@ namespace GeminiLauncher.ViewModels
 
         private async Task LoadInitialAsync()
         {
-            await Task.Delay(100);
+            await Task.Delay(100).ConfigureAwait(false);
 
+            // Try preloaded data first (don't wait, just check)
             if (PreloadService.IsPreloaded && PreloadService.CachedTrendingMods.Count > 0)
             {
-                Application.Current.Dispatcher.Invoke(() =>
+                await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     TrendingMods.Clear();
                     foreach (var mod in PreloadService.CachedTrendingMods) TrendingMods.Add(mod);
@@ -86,6 +131,7 @@ namespace GeminiLauncher.ViewModels
                 return;
             }
 
+            // Load from API directly
             _featuredLoadCts?.Cancel();
             _featuredLoadCts = new CancellationTokenSource();
             try { await LoadFeaturedContentAsync(_featuredLoadCts.Token); }
@@ -99,20 +145,26 @@ namespace GeminiLauncher.ViewModels
             {
                 ct.ThrowIfCancellationRequested();
 
-                var trendingTask = _modrinthService.GetTrendingAsync(10, SelectedCategory);
-                var newestTask = _modrinthService.GetNewestAsync(10, SelectedCategory);
+                var trendingTask = _modrinthService.GetTrendingAsync(6, SelectedCategory, SelectedGameVersion);
+                var newestTask = _modrinthService.GetNewestAsync(6, SelectedCategory, SelectedGameVersion);
 
-                await Task.WhenAll(trendingTask, newestTask);
+                await Task.WhenAll(trendingTask, newestTask).ConfigureAwait(false);
                 ct.ThrowIfCancellationRequested();
 
                 var trending = trendingTask.Result;
                 var newest = newestTask.Result;
 
+                if (trending.Count == 0 && newest.Count == 0)
+                {
+                    await Application.Current.Dispatcher.InvokeAsync(() => IsFeaturedLoading = false);
+                    return;
+                }
+
                 var allProjects = trending.Concat(newest).ToList();
 
                 var imageTask = PreloadImagesAsync(allProjects, ct);
 
-                Application.Current.Dispatcher.Invoke(() =>
+                await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     TrendingMods.Clear();
                     foreach (var mod in trending) TrendingMods.Add(mod);
@@ -128,7 +180,7 @@ namespace GeminiLauncher.ViewModels
             catch (OperationCanceledException) { }
             catch
             {
-                Application.Current.Dispatcher.Invoke(() => IsFeaturedLoading = false);
+                await Application.Current.Dispatcher.InvokeAsync(() => IsFeaturedLoading = false);
             }
         }
 
@@ -141,10 +193,10 @@ namespace GeminiLauncher.ViewModels
                     if (ct.IsCancellationRequested) return;
                     if (!string.IsNullOrEmpty(mod.IconUrl))
                     {
-                        var img = await ImageCache.GetOrLoadAsync(mod.IconUrl, 180);
+                        var img = await ImageCache.GetOrLoadAsync(mod.IconUrl, 180).ConfigureAwait(false);
                         if (img != null && !ct.IsCancellationRequested)
                         {
-                            Application.Current.Dispatcher.Invoke(() => mod.IconImage = img);
+                            await Application.Current.Dispatcher.InvokeAsync(() => mod.IconImage = img);
                         }
                     }
                 });
@@ -157,6 +209,16 @@ namespace GeminiLauncher.ViewModels
         private void SwitchCategory(string category)
         {
             SelectedCategory = category;
+            SearchQuery = string.Empty;
+            HasSearchResults = false;
+            _featuredLoadCts?.Cancel();
+            _ = LoadFeaturedContentAsync();
+        }
+
+        [RelayCommand]
+        private void FilterByVersion(string? version)
+        {
+            SelectedGameVersion = SelectedGameVersion == version ? null : version;
             SearchQuery = string.Empty;
             HasSearchResults = false;
             _featuredLoadCts?.Cancel();
@@ -193,32 +255,37 @@ namespace GeminiLauncher.ViewModels
             try
             {
                 var query = SearchQuery ?? "";
-                var results = await _modrinthService.SearchProjectsAsync(query, 20, "relevance", SelectedCategory);
+                var results = await _modrinthService.SearchProjectsAsync(query, 20, "relevance", SelectedCategory, 0, SelectedGameVersion).ConfigureAwait(false);
 
                 ct.ThrowIfCancellationRequested();
 
                 if (results.Count == 0)
                 {
-                    IsSearchEmpty = true;
+                    await Application.Current.Dispatcher.InvokeAsync(() => IsSearchEmpty = true);
                     return;
                 }
 
                 await PreloadImagesAsync(results, ct);
 
-                foreach (var item in results)
-                    SearchResults.Add(item);
-
-                HasSearchResults = true;
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    foreach (var item in results)
+                        SearchResults.Add(item);
+                    HasSearchResults = true;
+                });
             }
             catch (OperationCanceledException) { }
             catch (System.Exception ex)
             {
-                IsSearchEmpty = true;
-                iOS26Dialog.Show($"搜索失败: {ex.Message}", "错误", DialogIcon.Error);
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    IsSearchEmpty = true;
+                    iOS26Dialog.Show($"搜索失败: {ex.Message}", "错误", DialogIcon.Error);
+                });
             }
             finally
             {
-                IsBusy = false;
+                await Application.Current.Dispatcher.InvokeAsync(() => IsBusy = false);
             }
         }
 
@@ -253,52 +320,26 @@ namespace GeminiLauncher.ViewModels
             {
                 int offset = SearchResults.Count;
                 var query = SearchQuery ?? "";
-                var results = await _modrinthService.SearchProjectsAsync(query, 20, "relevance", SelectedCategory, offset);
+                var results = await _modrinthService.SearchProjectsAsync(query, 20, "relevance", SelectedCategory, offset).ConfigureAwait(false);
 
                 var imageTask = PreloadImagesAsync(results, CancellationToken.None);
 
-                foreach (var item in results)
-                    SearchResults.Add(item);
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    foreach (var item in results)
+                        SearchResults.Add(item);
+                });
 
                 await imageTask;
             }
             catch { }
-            finally { IsBusy = false; }
+            finally { await Application.Current.Dispatcher.InvokeAsync(() => IsBusy = false); }
         }
 
         [RelayCommand]
-        private async Task DownloadMod(ModProject project)
+        private void DownloadMod(ModProject project)
         {
-            if (project == null) return;
-
-            try
-            {
-                IsBusy = true;
-                var mainVM = ((App)Application.Current).MainWindow.DataContext as MainViewModel;
-                string? targetVersion = mainVM?.SelectedVersion?.Id;
-
-                if (!string.IsNullOrEmpty(targetVersion) && targetVersion.Contains(" "))
-                    targetVersion = targetVersion.Split(' ')[0];
-
-                if (string.IsNullOrEmpty(targetVersion))
-                {
-                    if (iOS26Dialog.Show("未选择游戏版本，是否下载最新版本？", "版本检查", DialogIcon.Warning, DialogButtons.YesNo) != true) return;
-                    targetVersion = null;
-                }
-
-                var visitedProjects = new System.Collections.Generic.HashSet<string>();
-                await DownloadProjectRecursive(project.Id, targetVersion, visitedProjects);
-
-                iOS26Dialog.Show("下载完成！", "成功", DialogIcon.Success);
-            }
-            catch (System.Exception ex)
-            {
-                iOS26Dialog.Show($"下载失败: {ex.Message}", "错误", DialogIcon.Error);
-            }
-            finally
-            {
-                IsBusy = false;
-            }
+            ViewDetail(project);
         }
 
         private async Task DownloadProjectRecursive(string projectId, string? gameVersion, System.Collections.Generic.HashSet<string> visited)
@@ -369,6 +410,264 @@ namespace GeminiLauncher.ViewModels
                 {
                     IsImporting = false;
                 }
+            }
+        }
+
+        [RelayCommand]
+        private void ToggleLocalModPanel()
+        {
+            IsLocalModPanelOpen = !IsLocalModPanelOpen;
+            if (IsLocalModPanelOpen)
+            {
+                LoadInstalledMods();
+            }
+        }
+
+        [RelayCommand]
+        private void AddLocalMod()
+        {
+            var dialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Filter = "Mod文件 (*.jar;*.zip)|*.jar;*.zip|所有文件 (*.*)|*.*",
+                Title = "选择Mod或材质包文件",
+                Multiselect = true
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                foreach (var filePath in dialog.FileNames)
+                {
+                    if (LocalMods.Any(m => m.FilePath == filePath)) continue;
+
+                    var fileInfo = new FileInfo(filePath);
+                    var extension = fileInfo.Extension.ToLowerInvariant();
+                    var fileType = extension switch
+                    {
+                        ".jar" => "Mod",
+                        ".zip" => "材质包",
+                        _ => "未知"
+                    };
+
+                    var localMod = new LocalModFile
+                    {
+                        FileName = fileInfo.Name,
+                        FilePath = filePath,
+                        FileType = fileType,
+                        FileSize = fileInfo.Length,
+                        IsEnabled = true
+                    };
+
+                    LocalMods.Add(localMod);
+                }
+            }
+        }
+
+        [RelayCommand]
+        private void RemoveLocalMod(LocalModFile? mod)
+        {
+            if (mod != null && LocalMods.Contains(mod))
+            {
+                LocalMods.Remove(mod);
+            }
+        }
+
+        [RelayCommand]
+        private void ApplyLocalMods()
+        {
+            if (LocalMods.Count == 0)
+            {
+                iOS26Dialog.Show("请先添加Mod或材质包文件", "提示", DialogIcon.Info);
+                return;
+            }
+
+            var mainVM = Application.Current.MainWindow.DataContext as MainViewModel;
+            string gamePath = mainVM?.ConfigService.Settings.GamePath ?? ".minecraft";
+
+            if (string.IsNullOrEmpty(mainVM?.SelectedVersion?.Id))
+            {
+                iOS26Dialog.Show("请先选择一个游戏版本", "提示", DialogIcon.Warning);
+                return;
+            }
+
+            string versionId = mainVM.SelectedVersion.Id;
+            if (versionId.Contains(" "))
+                versionId = versionId.Split(' ')[0];
+
+            var modsDir = Path.Combine(gamePath, "mods");
+            var resourcePacksDir = Path.Combine(gamePath, "resourcepacks");
+
+            Directory.CreateDirectory(modsDir);
+            Directory.CreateDirectory(resourcePacksDir);
+
+            int successCount = 0;
+            foreach (var mod in LocalMods.Where(m => m.IsEnabled))
+            {
+                try
+                {
+                    string destDir = mod.FileType == "材质包" ? resourcePacksDir : modsDir;
+                    string destPath = Path.Combine(destDir, mod.FileName);
+
+                    if (!File.Exists(destPath) || iOS26Dialog.Show($"文件 {mod.FileName} 已存在，是否覆盖？", "确认", DialogIcon.Warning, DialogButtons.YesNo) == true)
+                    {
+                        File.Copy(mod.FilePath, destPath, true);
+                        successCount++;
+
+                        if (!InstalledMods.Contains(mod.FileName))
+                            InstalledMods.Add(mod.FileName);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    iOS26Dialog.Show($"复制文件失败: {ex.Message}", "错误", DialogIcon.Error);
+                }
+            }
+
+            if (successCount > 0)
+            {
+                iOS26Dialog.Show($"成功安装 {successCount} 个文件到版本 {versionId}", "成功", DialogIcon.Success);
+                IsLocalModPanelOpen = false;
+            }
+        }
+
+        [RelayCommand]
+        private void PreviewLocalMod(LocalModFile? mod)
+        {
+            if (mod == null) return;
+            SelectedLocalMod = mod;
+
+            if (mod.FileType == "材质包" && Path.GetExtension(mod.FilePath).ToLowerInvariant() == ".zip")
+            {
+                try
+                {
+                    using var archive = System.IO.Compression.ZipFile.OpenRead(mod.FilePath);
+                    var iconEntry = archive.Entries.FirstOrDefault(e =>
+                        e.Name.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
+                        e.Name.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                        e.Name == "pack.png" || e.Name == "pack.jpg");
+
+                    if (iconEntry != null)
+                    {
+                        using var stream = iconEntry.Open();
+                        var bitmap = new System.Windows.Media.Imaging.BitmapImage();
+                        bitmap.BeginInit();
+                        bitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                        bitmap.StreamSource = stream;
+                        bitmap.EndInit();
+                        bitmap.Freeze();
+                        mod.PreviewImage = bitmap;
+                    }
+                }
+                catch { }
+            }
+        }
+
+        private void LoadInstalledMods()
+        {
+            InstalledMods.Clear();
+            var mainVM = Application.Current.MainWindow.DataContext as MainViewModel;
+            string gamePath = mainVM?.ConfigService.Settings.GamePath ?? ".minecraft";
+            string modsDir = Path.Combine(gamePath, "mods");
+
+            if (Directory.Exists(modsDir))
+            {
+                foreach (var file in Directory.GetFiles(modsDir, "*.*")
+                    .Where(f => f.EndsWith(".jar", StringComparison.OrdinalIgnoreCase) ||
+                                f.EndsWith(".zip", StringComparison.OrdinalIgnoreCase)))
+                {
+                    InstalledMods.Add(Path.GetFileName(file));
+                }
+            }
+        }
+
+        [RelayCommand]
+        private void RemoveInstalledMod(string? fileName)
+        {
+            if (string.IsNullOrEmpty(fileName)) return;
+
+            if (iOS26Dialog.Show($"确定要删除已安装的 {fileName} 吗？", "确认删除", DialogIcon.Warning, DialogButtons.YesNo) != true)
+                return;
+
+            var mainVM = Application.Current.MainWindow.DataContext as MainViewModel;
+            string gamePath = mainVM?.ConfigService.Settings.GamePath ?? ".minecraft";
+            string modsDir = Path.Combine(gamePath, "mods");
+            string filePath = Path.Combine(modsDir, fileName);
+
+            try
+            {
+                if (File.Exists(filePath))
+                {
+                    File.Delete(filePath);
+                    InstalledMods.Remove(fileName);
+                    iOS26Dialog.Show("删除成功", "成功", DialogIcon.Success);
+                }
+            }
+            catch (Exception ex)
+            {
+                iOS26Dialog.Show($"删除失败: {ex.Message}", "错误", DialogIcon.Error);
+            }
+        }
+
+        [RelayCommand]
+        private async void ViewDetail(ModProject? project)
+        {
+            if (project == null) return;
+
+            var mainVM = Application.Current.MainWindow.DataContext as MainViewModel;
+            string? gameVersion = mainVM?.SelectedVersion?.Id;
+            if (!string.IsNullOrEmpty(gameVersion) && gameVersion.Contains(" "))
+                gameVersion = gameVersion.Split(' ')[0];
+
+            PreloadDetailAsync(project.Id);
+
+            var detailPage = new Views.ResourceDetailPage(project, gameVersion);
+            NavigationService?.Navigate(detailPage);
+        }
+
+        public static async Task PreloadDetailAsync(string projectId)
+        {
+            if (_preloadCache.ContainsKey(projectId)) return;
+
+            var service = new ModrinthService();
+            _preloadCache.TryAdd(projectId, service.GetProjectDetailAsync(projectId));
+        }
+
+        public static ResourceDetail? GetPreloadedDetail(string projectId)
+        {
+            if (_preloadCache.TryGetValue(projectId, out var task) && task.IsCompletedSuccessfully)
+                return task.Result;
+            return null;
+        }
+
+        public static async Task<ResourceDetail?> WaitForPreloadedDetailAsync(string projectId)
+        {
+            if (_preloadCache.TryGetValue(projectId, out var task))
+            {
+                try
+                {
+                    return await task;
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+            return null;
+        }
+
+        private System.Windows.Navigation.NavigationService? NavigationService
+        {
+            get
+            {
+                foreach (var page in Application.Current.Windows.OfType<Window>())
+                {
+                    if (page is MainWindow mw)
+                    {
+                        var rootFrame = mw.FindName("RootFrame") as Frame;
+                        if (rootFrame != null)
+                            return rootFrame.NavigationService;
+                    }
+                }
+                return null;
             }
         }
     }

@@ -1,3 +1,4 @@
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using GeminiLauncher.Services.Network;
@@ -62,6 +63,24 @@ namespace GeminiLauncher.Views
                     task.IsFailed = true;
                 }
             }
+        }
+
+        private void OpenFolder_Click(object sender, RoutedEventArgs e)
+        {
+            var mainVM = Application.Current.MainWindow.DataContext as ViewModels.MainViewModel;
+            string gamePath = mainVM?.ConfigService.Settings.GamePath ?? ".minecraft";
+            string modsDir = Path.Combine(gamePath, "mods");
+            
+            if (!Directory.Exists(modsDir))
+            {
+                Directory.CreateDirectory(modsDir);
+            }
+
+            try
+            {
+                System.Diagnostics.Process.Start("explorer.exe", modsDir);
+            }
+            catch { }
         }
     }
 }

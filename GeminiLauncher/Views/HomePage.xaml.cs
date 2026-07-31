@@ -545,6 +545,15 @@ namespace GeminiLauncher.Views
             }
         }
 
+        private void CancelLaunch_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (DataContext is MainViewModel vm)
+            {
+                vm.IsLaunching = false;
+                vm.StatusMessage = "准备就绪";
+            }
+        }
+
         private string GetString(string key)
         {
             return (string)Application.Current.FindResource(key) ?? key;

@@ -10,7 +10,7 @@ namespace GeminiLauncher.Controls
 {
     public static class iOS26Dialog
     {
-        public static bool? Show(Window owner, string message, string title = "提示", DialogIcon icon = DialogIcon.Info, DialogButtons buttons = DialogButtons.OK)
+        public static bool? Show(Window? owner, string message, string title = "提示", DialogIcon icon = DialogIcon.Info, DialogButtons buttons = DialogButtons.OK)
         {
             var cardBg = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#1C1C24")!);
             var greenAccent = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#00E676")!);

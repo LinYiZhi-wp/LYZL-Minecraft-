@@ -33,6 +33,20 @@ namespace GeminiLauncher.Views
                 // Restore memory slider
                 MemorySlider.Value = cfg.MaxRam > 0 ? cfg.MaxRam : 4096;
 
+                // Restore Auto/Custom memory mode
+                if (cfg.AutoDetectMemory)
+                {
+                    AutoMemoryRadio.IsChecked = true;
+                    CustomMemoryRadio.IsChecked = false;
+                    MemorySlider.IsEnabled = false;
+                }
+                else
+                {
+                    AutoMemoryRadio.IsChecked = false;
+                    CustomMemoryRadio.IsChecked = true;
+                    MemorySlider.IsEnabled = true;
+                }
+
                 // Restore version isolation toggle
                 VersionIsolationToggle.IsChecked = cfg.VersionIsolation;
 
@@ -242,20 +256,52 @@ namespace GeminiLauncher.Views
             }
         }
 
+        private void AutoMemoryRadio_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!IsLoaded) return;
+            if (DataContext is ViewModels.MainViewModel vm)
+            {
+                vm.ConfigService.Settings.AutoDetectMemory = true;
+                MemorySlider.IsEnabled = false;
+
+                // Auto-detect and set recommended memory
+                long totalMem = GeminiLauncher.Services.LaunchService.GetTotalSystemMemoryMB();
+                long recommended = totalMem * 50 / 100;
+                recommended = Math.Max(1024, Math.Min(recommended, totalMem - 1024));
+                MemorySlider.Value = Math.Max(2048, recommended);
+                vm.ConfigService.Settings.MaxRam = (int)MemorySlider.Value;
+                vm.ConfigService.SaveConfig();
+                UpdateMemoryValueText();
+            }
+        }
+
+        private void CustomMemoryRadio_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!IsLoaded) return;
+            if (DataContext is ViewModels.MainViewModel vm)
+            {
+                vm.ConfigService.Settings.AutoDetectMemory = false;
+                MemorySlider.IsEnabled = true;
+                vm.ConfigService.SaveConfig();
+                UpdateMemoryValueText();
+            }
+        }
+
         private void UpdateMemoryValueText()
         {
             if (MemoryValueText != null && MemorySlider != null)
             {
                 int valueMB = (int)MemorySlider.Value;
-                MemoryValueText.Text = $"{valueMB} MB";
+                bool isAuto = AutoMemoryRadio.IsChecked == true;
+                string modeLabel = isAuto ? " (自动)" : " (自定义)";
+                MemoryValueText.Text = $"{valueMB} MB{modeLabel}";
 
                 // Smart memory warning
                 if (MemoryWarningText != null)
                 {
                     try
                     {
-                        var gcInfo = System.GC.GetGCMemoryInfo();
-                        long totalPhysicalMB = gcInfo.TotalAvailableMemoryBytes / (1024 * 1024);
+                        long totalPhysicalMB = GeminiLauncher.Services.LaunchService.GetTotalSystemMemoryMB();
                         double ratio = (double)valueMB / totalPhysicalMB;
 
                         if (valueMB < 1024)
@@ -272,7 +318,7 @@ namespace GeminiLauncher.Views
                         }
                         else
                         {
-                            MemoryWarningText.Text = "✓ 推荐范围";
+                            MemoryWarningText.Text = $"✓ 系统内存 {totalPhysicalMB} MB | 推荐范围";
                             MemoryWarningText.Foreground = new System.Windows.Media.SolidColorBrush(
                                 (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#00E676")!);
                         }
@@ -515,6 +561,26 @@ namespace GeminiLauncher.Views
             else
             {
                 MaxRamSlider.Maximum = 32768;
+            }
+        }
+
+        private void ModrinthMirror_Changed(object sender, TextChangedEventArgs e)
+        {
+            if (!IsLoaded) return;
+            if (DataContext is ViewModels.MainViewModel vm)
+            {
+                vm.ConfigService.SaveConfig();
+            }
+        }
+
+        private void ResetModrinthMirror_Click(object sender, RoutedEventArgs e)
+        {
+            const string defaultUrl = "https://api.modrinth.com/v2/";
+            ModrinthMirrorBox.Text = defaultUrl;
+            if (DataContext is ViewModels.MainViewModel vm)
+            {
+                vm.ConfigService.Settings.ModrinthApiBaseUrl = defaultUrl;
+                vm.ConfigService.SaveConfig();
             }
         }
     }

@@ -13,6 +13,39 @@
         <conv:ProgressToIconConverter x:Key="ProgressToIconConverter"/>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <conv:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
+        
+        <!-- Round icon button style -->
+        <Style x:Key="RoundIconButton" TargetType="Button">
+            <Setter Property="Width" Value="36"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Background" Value="#15FFFFFF"/>
+            <Setter Property="Foreground" Value="#B0FFFFFF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#20FFFFFF"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="18">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#25FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#10FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Page.Resources>
 
     <Grid Background="{DynamicResource iOS26.Background}">
@@ -50,6 +83,37 @@
                         <TextBlock Text="{Binding TotalRemainingFiles}" FontSize="24" FontWeight="Bold" Foreground="White" Margin="0,4,0,0"/>
                     </StackPanel>
                 </Border>
+
+                <!-- Open Folder Button -->
+                <Button Click="OpenFolder_Click" Cursor="Hand" Margin="0,24,0,0"
+                        ToolTip="打开下载文件夹">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="border" Background="#15FFFFFF" 
+                                    CornerRadius="14" Padding="16,14"
+                                    BorderBrush="#20FFFFFF" BorderThickness="1">
+                                <Grid>
+                                    <StackPanel>
+                                        <TextBlock Text="📂" FontSize="22" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="打开文件夹" FontSize="12" FontWeight="SemiBold" 
+                                                   Foreground="White" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                                        <TextBlock Text="浏览已下载的 Mod 文件" FontSize="10" 
+                                                   Foreground="#60FFFFFF" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="#25FFFFFF"/>
+                                    <Setter TargetName="border" Property="BorderBrush" Value="#40FFFFFF"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="#10FFFFFF"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
             </StackPanel>
         </Border>
 
@@ -64,32 +128,36 @@
             <Border Grid.Row="0" Margin="30,20,30,0">
                 <DockPanel LastChildFill="True">
                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" VerticalAlignment="Center">
-                        <Button Style="{StaticResource iOS26.CapsuleButton}" 
-                                Foreground="#B0FFFFFF" Background="#10FFFFFF"
-                                Width="36" Height="36" Padding="0"
+                        <Button Style="{StaticResource RoundIconButton}"
                                 Click="Back_Click"
                                 ToolTip="返回">
-                            <TextBlock Text="←" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock Text="←" FontSize="16" FontWeight="Bold"/>
                         </Button>
-                        <TextBlock Text="{DynamicResource DownloadManager_Title}" FontSize="18" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                        <TextBlock Text="{DynamicResource DownloadManager_Title}" FontSize="18" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center" Margin="16,0,0,0"/>
                     </StackPanel>
 
                     <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center">
-                        <Button Content="🔄 重试失败" 
-                                Style="{StaticResource iOS26.CapsuleButton}" 
+                        <Button Style="{StaticResource RoundIconButton}"
                                 Foreground="#FFC107" Background="#1AFFC107"
-                                Height="32" FontSize="11" Margin="6,0,4,0"
-                                Click="RetryFailed_Click"/>
-                        <Button Content="🗑 清除已完成" 
-                                Style="{StaticResource iOS26.CapsuleButton}" 
-                                Foreground="#80FFFFFF" Background="#15FFFFFF"
-                                Height="32" FontSize="11" Margin="4,0,4,0"
-                                Click="RemoveCompleted_Click"/>
-                        <Button Content="✕ 全部取消" 
-                                Style="{StaticResource iOS26.CapsuleButton}" 
+                                BorderBrush="#30FFC107"
+                                Margin="0,0,6,0"
+                                Click="RetryFailed_Click"
+                                ToolTip="重试失败任务">
+                            <TextBlock Text="🔄" FontSize="14"/>
+                        </Button>
+                        <Button Style="{StaticResource RoundIconButton}"
+                                Margin="0,0,6,0"
+                                Click="RemoveCompleted_Click"
+                                ToolTip="清除已完成">
+                            <TextBlock Text="🗑" FontSize="14"/>
+                        </Button>
+                        <Button Style="{StaticResource RoundIconButton}"
                                 Foreground="#FF5252" Background="#1AFF5252"
-                                Height="32" FontSize="11" Margin="4,0,0,0"
-                                Click="CancelAll_Click"/>
+                                BorderBrush="#30FF5252"
+                                Click="CancelAll_Click"
+                                ToolTip="取消全部任务">
+                            <TextBlock Text="✕" FontSize="14" FontWeight="Bold"/>
+                        </Button>
                     </StackPanel>
                 </DockPanel>
             </Border>

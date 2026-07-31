@@ -24,24 +24,26 @@ namespace GeminiLauncher.Services.Animation
 
     public static class TransitionConfig
     {
-        public static Duration DefaultDuration => TimeSpan.FromSeconds(0.35);
-        public static Duration FastDuration => TimeSpan.FromSeconds(0.2);
-        public static Duration SlowDuration => TimeSpan.FromSeconds(0.5);
+        // Optimized durations — faster for responsiveness
+        public static Duration DefaultDuration => TimeSpan.FromSeconds(0.28);
+        public static Duration FastDuration => TimeSpan.FromSeconds(0.16);
+        public static Duration SlowDuration => TimeSpan.FromSeconds(0.4);
 
-        public static double SlideDistance => 60;
-        public static double SlideDistanceSubtle => 30;
-        public static double ScaleFrom => 0.92;
+        public static double SlideDistance => 48;
+        public static double SlideDistanceSubtle => 24;
+        public static double ScaleFrom => 0.94;
 
-        public static double PageEnterSlideX => 24;
-        public static double PageExitSlideX => 16;
-        public static Duration PageEnterDuration => TimeSpan.FromSeconds(0.3);
-        public static Duration PageExitDuration => TimeSpan.FromSeconds(0.15);
+        public static double PageEnterSlideX => 20;
+        public static double PageExitSlideX => 12;
+        public static Duration PageEnterDuration => TimeSpan.FromSeconds(0.25);
+        public static Duration PageExitDuration => TimeSpan.FromSeconds(0.12);
 
+        // Unified easing — CubicEase for smooth, natural deceleration
         public static IEasingFunction SmoothEase => new CubicEase { EasingMode = EasingMode.EaseOut };
         public static IEasingFunction DecelerateEase => new CubicEase { EasingMode = EasingMode.EaseOut };
         public static IEasingFunction AccelerateEase => new CubicEase { EasingMode = EasingMode.EaseIn };
-        public static IEasingFunction SpringEase => new BackEase { EasingMode = EasingMode.EaseOut, Amplitude = 0.4 };
-        public static IEasingFunction JellyEase => new ElasticEase { EasingMode = EasingMode.EaseOut, Springiness = 5, Oscillations = 1 };
+        public static IEasingFunction SpringEase => new CubicEase { EasingMode = EasingMode.EaseOut };
+        public static IEasingFunction JellyEase => new ElasticEase { EasingMode = EasingMode.EaseOut, Springiness = 3, Oscillations = 1 };
         public static IEasingFunction PageEnterEase => new CubicEase { EasingMode = EasingMode.EaseOut };
         public static IEasingFunction PageExitEase => new CubicEase { EasingMode = EasingMode.EaseIn };
     }
@@ -140,8 +142,8 @@ namespace GeminiLauncher.Services.Animation
 
         public static void PlayContainerEnter(FrameworkElement container, bool isForward = true)
         {
-            var scale = new ScaleTransform(0.97, 0.97);
-            var translate = new TranslateTransform(isForward ? 16 : -16, 0);
+            var scale = new ScaleTransform(0.98, 0.98);
+            var translate = new TranslateTransform(isForward ? 12 : -12, 0);
             var group = new TransformGroup();
             group.Children.Add(scale);
             group.Children.Add(translate);
@@ -151,8 +153,8 @@ namespace GeminiLauncher.Services.Animation
             var ease = TransitionConfig.PageEnterEase;
             var duration = TransitionConfig.PageEnterDuration;
 
-            scale.BeginAnimation(ScaleTransform.ScaleXProperty, new DoubleAnimation(0.97, 1.0, duration) { EasingFunction = ease });
-            scale.BeginAnimation(ScaleTransform.ScaleYProperty, new DoubleAnimation(0.97, 1.0, duration) { EasingFunction = ease });
+            scale.BeginAnimation(ScaleTransform.ScaleXProperty, new DoubleAnimation(0.98, 1.0, duration) { EasingFunction = ease });
+            scale.BeginAnimation(ScaleTransform.ScaleYProperty, new DoubleAnimation(0.98, 1.0, duration) { EasingFunction = ease });
             translate.BeginAnimation(TranslateTransform.XProperty, new DoubleAnimation(translate.X, 0, duration) { EasingFunction = ease });
 
             var timer = new DispatcherTimer { Interval = duration.TimeSpan };
@@ -178,9 +180,9 @@ namespace GeminiLauncher.Services.Animation
             var ease = TransitionConfig.PageExitEase;
             var duration = TransitionConfig.PageExitDuration;
 
-            scale.BeginAnimation(ScaleTransform.ScaleXProperty, new DoubleAnimation(1.0, 0.98, duration) { EasingFunction = ease });
-            scale.BeginAnimation(ScaleTransform.ScaleYProperty, new DoubleAnimation(1.0, 0.98, duration) { EasingFunction = ease });
-            translate.BeginAnimation(TranslateTransform.XProperty, new DoubleAnimation(0, isForward ? -12 : 12, duration) { EasingFunction = ease });
+            scale.BeginAnimation(ScaleTransform.ScaleXProperty, new DoubleAnimation(1.0, 0.985, duration) { EasingFunction = ease });
+            scale.BeginAnimation(ScaleTransform.ScaleYProperty, new DoubleAnimation(1.0, 0.985, duration) { EasingFunction = ease });
+            translate.BeginAnimation(TranslateTransform.XProperty, new DoubleAnimation(0, isForward ? -8 : 8, duration) { EasingFunction = ease });
 
             var timer = new DispatcherTimer { Interval = duration.TimeSpan };
             timer.Tick += (s, e) =>
@@ -193,7 +195,7 @@ namespace GeminiLauncher.Services.Animation
             timer.Start();
         }
 
-        public static void PlayStaggeredIn(Panel container, double staggerMs = 40)
+        public static void PlayStaggeredIn(Panel container, double staggerMs = 35)
         {
             for (int i = 0; i < container.Children.Count; i++)
             {
@@ -202,7 +204,7 @@ namespace GeminiLauncher.Services.Animation
                     var (_, translate) = EnsureTransforms(child);
 
                     child.Opacity = 0;
-                    translate.Y = 20;
+                    translate.Y = 16;
 
                     var delay = TimeSpan.FromMilliseconds(i * staggerMs);
 
@@ -217,7 +219,7 @@ namespace GeminiLauncher.Services.Animation
                     Storyboard.SetTargetProperty(fade, new PropertyPath("Opacity"));
                     sb.Children.Add(fade);
 
-                    var slide = new DoubleAnimation(20, 0, TransitionConfig.DefaultDuration)
+                    var slide = new DoubleAnimation(16, 0, TransitionConfig.DefaultDuration)
                     {
                         BeginTime = delay,
                         EasingFunction = TransitionConfig.SmoothEase
@@ -238,7 +240,7 @@ namespace GeminiLauncher.Services.Animation
             if (expand)
             {
                 target.Opacity = 0;
-                translate.Y = -8;
+                translate.Y = -6;
 
                 var sb = new Storyboard();
 
@@ -250,9 +252,9 @@ namespace GeminiLauncher.Services.Animation
                 Storyboard.SetTargetProperty(fade, new PropertyPath("Opacity"));
                 sb.Children.Add(fade);
 
-                var slide = new DoubleAnimation(-8, 0, TransitionConfig.DefaultDuration)
+                var slide = new DoubleAnimation(-6, 0, TransitionConfig.DefaultDuration)
                 {
-                    EasingFunction = TransitionConfig.SpringEase
+                    EasingFunction = TransitionConfig.SmoothEase
                 };
                 Storyboard.SetTarget(slide, translate);
                 Storyboard.SetTargetProperty(slide, new PropertyPath("Y"));
@@ -266,7 +268,7 @@ namespace GeminiLauncher.Services.Animation
             {
                 var sb = new Storyboard();
 
-                var fade = new DoubleAnimation(1, 0, TimeSpan.FromSeconds(0.15))
+                var fade = new DoubleAnimation(1, 0, TimeSpan.FromSeconds(0.12))
                 {
                     EasingFunction = TransitionConfig.AccelerateEase
                 };
@@ -274,7 +276,7 @@ namespace GeminiLauncher.Services.Animation
                 Storyboard.SetTargetProperty(fade, new PropertyPath("Opacity"));
                 sb.Children.Add(fade);
 
-                var slide = new DoubleAnimation(0, -8, TimeSpan.FromSeconds(0.15))
+                var slide = new DoubleAnimation(0, -6, TimeSpan.FromSeconds(0.12))
                 {
                     EasingFunction = TransitionConfig.AccelerateEase
                 };
@@ -288,7 +290,7 @@ namespace GeminiLauncher.Services.Animation
             }
         }
 
-        public static void PlayScaleBounce(FrameworkElement target, double from = 0.9, double to = 1.0)
+        public static void PlayScaleBounce(FrameworkElement target, double from = 0.92, double to = 1.0)
         {
             var (scale, _) = EnsureTransforms(target);
 
@@ -296,7 +298,7 @@ namespace GeminiLauncher.Services.Animation
 
             var scaleX = new DoubleAnimation(from, to, TransitionConfig.DefaultDuration)
             {
-                EasingFunction = TransitionConfig.SpringEase
+                EasingFunction = TransitionConfig.SmoothEase
             };
             Storyboard.SetTarget(scaleX, scale);
             Storyboard.SetTargetProperty(scaleX, new PropertyPath("ScaleX"));
@@ -304,7 +306,7 @@ namespace GeminiLauncher.Services.Animation
 
             var scaleY = new DoubleAnimation(from, to, TransitionConfig.DefaultDuration)
             {
-                EasingFunction = TransitionConfig.SpringEase
+                EasingFunction = TransitionConfig.SmoothEase
             };
             Storyboard.SetTarget(scaleY, scale);
             Storyboard.SetTargetProperty(scaleY, new PropertyPath("ScaleY"));
@@ -396,12 +398,12 @@ namespace GeminiLauncher.Services.Animation
             Storyboard.SetTargetProperty(fade, new PropertyPath("Opacity"));
             sb.Children.Add(fade);
 
-            var scaleX = new DoubleAnimation(TransitionConfig.ScaleFrom, 1.0, duration) { EasingFunction = TransitionConfig.SpringEase };
+            var scaleX = new DoubleAnimation(TransitionConfig.ScaleFrom, 1.0, duration) { EasingFunction = TransitionConfig.SmoothEase };
             Storyboard.SetTarget(scaleX, scale);
             Storyboard.SetTargetProperty(scaleX, new PropertyPath("ScaleX"));
             sb.Children.Add(scaleX);
 
-            var scaleY = new DoubleAnimation(TransitionConfig.ScaleFrom, 1.0, duration) { EasingFunction = TransitionConfig.SpringEase };
+            var scaleY = new DoubleAnimation(TransitionConfig.ScaleFrom, 1.0, duration) { EasingFunction = TransitionConfig.SmoothEase };
             Storyboard.SetTarget(scaleY, scale);
             Storyboard.SetTargetProperty(scaleY, new PropertyPath("ScaleY"));
             sb.Children.Add(scaleY);

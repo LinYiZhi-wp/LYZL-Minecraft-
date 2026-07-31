@@ -30,6 +30,8 @@ namespace GeminiLauncher.Services
 
         public int MaxDownloadThreads { get; set; } = 64;
 
+        public string ModrinthApiBaseUrl { get; set; } = "https://api.modrinth.com/v2/";
+
         public string GlobalJvmArguments { get; set; } = string.Empty;
         public string GlobalGameArguments { get; set; } = string.Empty;
         public string CustomWindowTitle { get; set; } = string.Empty;

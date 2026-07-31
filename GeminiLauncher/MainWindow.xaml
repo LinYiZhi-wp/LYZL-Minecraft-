@@ -125,10 +125,10 @@
 
         <StackPanel x:Name="NotificationContainer"
                     VerticalAlignment="Top"
-                    HorizontalAlignment="Right"
-                    Margin="0,60,20,0"
+                    HorizontalAlignment="Center"
+                    Margin="0,80,0,0"
                     Panel.ZIndex="2000"
-                    Width="360"/>
+                    Width="400"/>
 
         <views:DownloadManagerPanel VerticalAlignment="Bottom" HorizontalAlignment="Right" Panel.ZIndex="1000"/>
 

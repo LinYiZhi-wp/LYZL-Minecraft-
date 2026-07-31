@@ -25,20 +25,20 @@ namespace GeminiLauncher.Controls
             {
                 case NotificationType.Success:
                     IconText.Text = "✓";
-                    IconBorder.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(39, 174, 96)); // Green
+                    IconBorder.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(39, 174, 96));
                     break;
                 case NotificationType.Warning:
-                    IconText.Text = "⚠️";
-                    IconBorder.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(243, 156, 18)); // Orange
+                    IconText.Text = "⚠";
+                    IconBorder.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(243, 156, 18));
                     break;
                 case NotificationType.Error:
                     IconText.Text = "✕";
-                    IconBorder.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(192, 57, 43)); // Red
+                    IconBorder.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(192, 57, 43));
                     break;
                 case NotificationType.Info:
                 default:
-                    IconText.Text = "ℹ️";
-                    IconBorder.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(41, 128, 185)); // Blue
+                    IconText.Text = "ℹ";
+                    IconBorder.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(41, 128, 185));
                     break;
             }
 

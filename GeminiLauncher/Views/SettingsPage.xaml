@@ -48,7 +48,7 @@
                                            Style="{StaticResource iOS26.SettingsItem.Value}"/>
                                 
                                 <!-- Chevron -->
-                                <TextBlock Grid.Column="2" Text="›" FontSize="20" Foreground="#60FFFFFF" Margin="10,0,0,4" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="2" Text="›" FontSize="20" Foreground="{StaticResource TextDimBrush}" Margin="10,0,0,4" VerticalAlignment="Center"/>
                             </Grid>
                         </Border>
 
@@ -98,7 +98,7 @@
                                            MaxWidth="300"
                                            HorizontalAlignment="Right"/>
                                            
-                                <TextBlock Grid.Column="2" Text="›" FontSize="20" Foreground="#60FFFFFF" Margin="10,0,0,4" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="2" Text="›" FontSize="20" Foreground="{StaticResource TextDimBrush}" Margin="10,0,0,4" VerticalAlignment="Center"/>
                             </Grid>
                         </Border>
 
@@ -168,6 +168,27 @@
                                 <Slider Grid.Row="1" x:Name="ThreadsSlider" Minimum="1" Maximum="128" Value="{Binding ConfigService.Settings.MaxDownloadThreads, Mode=TwoWay}" LargeChange="8" SmallChange="1" IsSnapToTickEnabled="True" TickFrequency="1" ValueChanged="MaxThreads_ValueChanged" Style="{StaticResource iOS26.GlassSlider}"/>
                             </Grid>
                         </Border>
+
+                        <!-- Modrinth API Mirror -->
+                        <Border Style="{StaticResource iOS26.SettingsItem}">
+                            <StackPanel>
+                                <TextBlock Text="Modrinth API 镜像" Style="{StaticResource iOS26.SettingsItem.Title}" Margin="0,0,0,6"/>
+                                <TextBlock Text="国内用户可设置为镜像地址加速加载" FontSize="11" Foreground="{StaticResource TextDimBrush}" Margin="0,0,0,6"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox x:Name="ModrinthMirrorBox" Grid.Column="0" 
+                                             Text="{Binding ConfigService.Settings.ModrinthApiBaseUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             TextChanged="ModrinthMirror_Changed"
+                                             ToolTip="例如: https://modrinth.ink/v2/"/>
+                                    <Button Grid.Column="1" Content="重置" Margin="8,0,0,0"
+                                            Style="{StaticResource iOS26.SecondaryButton}" Height="30" Padding="12,0"
+                                            Click="ResetModrinthMirror_Click"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
                 </Border>
 
@@ -184,7 +205,7 @@
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Orientation="Vertical" VerticalAlignment="Center">
                                     <TextBlock Text="{DynamicResource Settings_AutoDetectMemory}" Style="{StaticResource iOS26.SettingsItem.Title}"/>
-                                    <TextBlock x:Name="SystemMemoryInfoText" Text="" FontSize="12" Foreground="#80FFFFFF" Margin="0,4,0,0"/>
+                                    <TextBlock x:Name="SystemMemoryInfoText" Text="" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" Margin="0,4,0,0"/>
                                 </StackPanel>
                                 <ui:ToggleSwitch x:Name="AutoDetectMemoryToggle" Grid.Column="1" IsChecked="{Binding ConfigService.Settings.AutoDetectMemory, Mode=TwoWay}" Checked="AutoDetectMemory_Changed" Unchecked="AutoDetectMemory_Changed"/>
                             </Grid>
@@ -341,11 +362,11 @@
                                 </StackPanel>
                                 
                                 <StackPanel Grid.Column="1" Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Right">
-                                    <TextBlock x:Name="JavaVersionText" Text="{DynamicResource Settings_SelectJavaPlaceholder}" FontSize="13" Foreground="#00E676" HorizontalAlignment="Right"/>
-                                    <TextBlock x:Name="JavaPathBox" Text="" FontSize="11" Foreground="#60FFFFFF" TextTrimming="CharacterEllipsis" MaxWidth="300" HorizontalAlignment="Right"/>
+                                    <TextBlock x:Name="JavaVersionText" Text="{DynamicResource Settings_SelectJavaPlaceholder}" FontSize="13" Foreground="{StaticResource AccentBrush}" HorizontalAlignment="Right"/>
+                                    <TextBlock x:Name="JavaPathBox" Text="" FontSize="11" Foreground="{StaticResource TextDimBrush}" TextTrimming="CharacterEllipsis" MaxWidth="300" HorizontalAlignment="Right"/>
                                 </StackPanel>
 
-                                <TextBlock Grid.Column="2" Text="›" FontSize="20" Foreground="#60FFFFFF" Margin="10,0,0,4" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="2" Text="›" FontSize="20" Foreground="{StaticResource TextDimBrush}" Margin="10,0,0,4" VerticalAlignment="Center"/>
                             </Grid>
                         </Border>
 
@@ -383,10 +404,10 @@
                                 <TextBlock Text="{DynamicResource Settings_AllocationMode}" Style="{StaticResource iOS26.SettingsItem.Title}"/>
                                 
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" Background="#20000000" VerticalAlignment="Center">
-                                    <Border CornerRadius="8" Background="#20FFFFFF" Padding="2">
+                                    <Border CornerRadius="{StaticResource RadiusSmall}" Background="{StaticResource GlassMediumBrush}" Padding="2">
                                         <StackPanel Orientation="Horizontal">
-                                             <RadioButton Content="{DynamicResource Settings_Auto}" IsChecked="True" Style="{StaticResource SegmentRadioButtonStyle}" GroupName="MemMode"/>
-                                             <RadioButton Content="{DynamicResource Settings_Custom}" x:Name="CustomMemoryRadio" Style="{StaticResource SegmentRadioButtonStyle}" GroupName="MemMode"/>
+                                             <RadioButton x:Name="AutoMemoryRadio" Content="{DynamicResource Settings_Auto}" IsChecked="True" Style="{StaticResource SegmentRadioButtonStyle}" GroupName="MemMode" Checked="AutoMemoryRadio_Checked"/>
+                                             <RadioButton x:Name="CustomMemoryRadio" Content="{DynamicResource Settings_Custom}" Style="{StaticResource SegmentRadioButtonStyle}" GroupName="MemMode" Checked="CustomMemoryRadio_Checked"/>
                                         </StackPanel>
                                     </Border>
                                 </StackPanel>
@@ -403,7 +424,7 @@
                                 
                                 <Grid Grid.Row="0" Margin="0,0,0,10">
                                     <TextBlock Text="{DynamicResource Settings_AllocatedMemory}" Style="{StaticResource iOS26.SettingsItem.Title}"/>
-                                    <TextBlock x:Name="MemoryValueText" Text="4096 MB" Style="{StaticResource iOS26.SettingsItem.Value}" FontWeight="Bold" Foreground="White"/>
+                                    <TextBlock x:Name="MemoryValueText" Text="4096 MB" Style="{StaticResource iOS26.SettingsItem.Value}" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}"/>
                                 </Grid>
                                 
                                 <Slider Grid.Row="1"
@@ -446,23 +467,23 @@
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
                                             <!-- Avatar placeholder -->
-                                            <Border Grid.Column="0" Width="32" Height="32" CornerRadius="16" Background="#40FFFFFF" Margin="0,0,12,0">
+                                            <Border Grid.Column="0" Width="32" Height="32" CornerRadius="{StaticResource RadiusLarge}" Background="{StaticResource GlassHeavyBrush}" Margin="0,0,12,0">
                                                 <TextBlock Text="👤" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                             </Border>
                                             
                                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                                 <TextBlock Text="{Binding Username}" Style="{StaticResource iOS26.SettingsItem.Title}"/>
-                                                <TextBlock Text="{Binding Type}" FontSize="12" Foreground="#80FFFFFF"/>
+                                                <TextBlock Text="{Binding Type}" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}"/>
                                             </StackPanel>
                                             
                                             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                                                <TextBlock Text="Current" Foreground="#00E676" VerticalAlignment="Center" Margin="0,0,10,0"
+                                                <TextBlock Text="Current" Foreground="{StaticResource AccentBrush}" VerticalAlignment="Center" Margin="0,0,10,0"
                                                            Visibility="{Binding Path=IsSelected, Converter={StaticResource BoolToVis}}"/>
                                                 
                                                 <Button Content="Remove" 
                                                         Click="RemoveAccount_Click" 
                                                         Tag="{Binding}"
-                                                        Background="Transparent" BorderThickness="0" Foreground="#FF5252"
+                                                        Background="Transparent" BorderThickness="0" Foreground="{StaticResource DangerBrush}"
                                                         Padding="8,4" FontSize="12" Cursor="Hand"/>
                                             </StackPanel>
                                         </Grid>
@@ -503,7 +524,7 @@
                                     <TextBlock Text="🔒" FontSize="16" Margin="0,0,12,0" VerticalAlignment="Center"/>
                                     <StackPanel>
                                         <TextBlock Text="{DynamicResource Settings_PrivacyMode}" Style="{StaticResource iOS26.SettingsItem.Title}"/>
-                                        <TextBlock Text="{DynamicResource Settings_PrivacyDesc}" FontSize="11" Opacity="0.5" Foreground="White"/>
+                                        <TextBlock Text="{DynamicResource Settings_PrivacyDesc}" FontSize="11" Opacity="0.5" Foreground="{StaticResource TextPrimaryBrush}"/>
                                     </StackPanel>
                                 </StackPanel>
                                 <ui:ToggleSwitch x:Name="PrivacyModeToggle" Grid.Column="1" IsChecked="False"/>
@@ -521,7 +542,7 @@
                                     <TextBlock Text="🔑" FontSize="16" Margin="0,0,12,0" VerticalAlignment="Center"/>
                                     <TextBlock Text="{DynamicResource Settings_TokenStatus}" Style="{StaticResource iOS26.SettingsItem.Title}"/>
                                 </StackPanel>
-                                <TextBlock x:Name="TokenStatusText" Grid.Column="1" Text="-" FontSize="12" Foreground="#80FFFFFF" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="TokenStatusText" Grid.Column="1" Text="-" FontSize="12" Foreground="{StaticResource TextTertiaryBrush}" VerticalAlignment="Center"/>
                             </Grid>
                         </Border>
                     </StackPanel>

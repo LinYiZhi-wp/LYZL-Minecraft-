@@ -65,12 +65,28 @@ namespace GeminiLauncher.ViewModels
         [ObservableProperty]
         private double _downloadProgress;
 
+        [ObservableProperty]
+        private string _forgeFilterText = string.Empty;
+
+        [ObservableProperty]
+        private string _fabricFilterText = string.Empty;
+
+        [ObservableProperty]
+        private string _optifineFilterText = string.Empty;
+
         public ObservableCollection<LoaderVersionItem> ForgeVersions { get; } = new();
         public ObservableCollection<LoaderVersionItem> FabricVersions { get; } = new();
         public ObservableCollection<LoaderVersionItem> OptiFineVersions { get; } = new();
 
+        public ObservableCollection<LoaderVersionItem> FilteredForgeVersions { get; } = new();
+        public ObservableCollection<LoaderVersionItem> FilteredFabricVersions { get; } = new();
+        public ObservableCollection<LoaderVersionItem> FilteredOptiFineVersions { get; } = new();
+
         private readonly LoaderApiService _loaderApiService = new();
+        private readonly ModLoaderService _modLoaderService = new();
         private bool _forgeLoaded, _fabricLoaded, _optifineLoaded;
+
+        private DownloadTask? _currentDownloadTask;
 
         public LoaderSelectionViewModel()
         {
@@ -97,6 +113,33 @@ namespace GeminiLauncher.ViewModels
             OptifineSelectedVersion = value?.Version ?? "";
         }
 
+        partial void OnForgeFilterTextChanged(string value)
+        {
+            ApplyFilter(ForgeVersions, FilteredForgeVersions, value);
+        }
+
+        partial void OnFabricFilterTextChanged(string value)
+        {
+            ApplyFilter(FabricVersions, FilteredFabricVersions, value);
+        }
+
+        partial void OnOptifineFilterTextChanged(string value)
+        {
+            ApplyFilter(OptiFineVersions, FilteredOptiFineVersions, value);
+        }
+
+        private void ApplyFilter(ObservableCollection<LoaderVersionItem> source, ObservableCollection<LoaderVersionItem> target, string filter)
+        {
+            target.Clear();
+            IEnumerable<LoaderVersionItem> filtered;
+            if (string.IsNullOrWhiteSpace(filter))
+                filtered = source;
+            else
+                filtered = source.Where(v => v.Version.Contains(filter, StringComparison.OrdinalIgnoreCase)).ToList();
+
+            foreach (var item in filtered) target.Add(item);
+        }
+
         [RelayCommand]
         private void ToggleForge()
         {
@@ -115,7 +158,12 @@ namespace GeminiLauncher.ViewModels
                         Application.Current.Dispatcher.Invoke(() =>
                         {
                             ForgeVersions.Clear();
-                            foreach (var v in t.Result) ForgeVersions.Add(v);
+                            FilteredForgeVersions.Clear();
+                            foreach (var v in t.Result)
+                            {
+                                ForgeVersions.Add(v);
+                                FilteredForgeVersions.Add(v);
+                            }
                             if (ForgeVersions.Count > 0) SelectedForgeItem = ForgeVersions[0];
                             IsForgeLoading = false;
                         });
@@ -141,7 +189,12 @@ namespace GeminiLauncher.ViewModels
                         Application.Current.Dispatcher.Invoke(() =>
                         {
                             FabricVersions.Clear();
-                            foreach (var v in t.Result) FabricVersions.Add(v);
+                            FilteredFabricVersions.Clear();
+                            foreach (var v in t.Result)
+                            {
+                                FabricVersions.Add(v);
+                                FilteredFabricVersions.Add(v);
+                            }
                             if (FabricVersions.Count > 0) SelectedFabricItem = FabricVersions[0];
                             IsFabricLoading = false;
                         });
@@ -167,7 +220,12 @@ namespace GeminiLauncher.ViewModels
                         Application.Current.Dispatcher.Invoke(() =>
                         {
                             OptiFineVersions.Clear();
-                            foreach (var v in t.Result) OptiFineVersions.Add(v);
+                            FilteredOptiFineVersions.Clear();
+                            foreach (var v in t.Result)
+                            {
+                                OptiFineVersions.Add(v);
+                                FilteredOptiFineVersions.Add(v);
+                            }
                             if (OptiFineVersions.Count > 0) SelectedOptifineItem = OptiFineVersions[0];
                             IsOptifineLoading = false;
                         });
@@ -181,6 +239,7 @@ namespace GeminiLauncher.ViewModels
             if (IsDownloading || SelectedVersion == null) return;
             IsDownloading = true;
             DownloadStatus = "正在准备下载...";
+            DownloadProgress = 0;
 
             try
             {
@@ -203,18 +262,133 @@ namespace GeminiLauncher.ViewModels
                     loaderVersion = OptifineSelectedVersion;
                 }
 
-                await DownloadManagerService.Instance.EnqueueGameDownloadWithLoader(
-                    SelectedVersion, loaderChoice, loaderVersion,
-                    ConfigService.Instance.Settings.DownloadSource);
+                var downloadSource = ConfigService.Instance.Settings.DownloadSource;
 
-                DownloadStatus = "下载已加入队列";
+                if (loaderChoice == "Forge")
+                {
+                    _currentDownloadTask = new DownloadTask
+                    {
+                        Name = $"{SelectedVersion.Id}-Forge{loaderVersion}",
+                        Status = "正在下载游戏核心...",
+                        Cts = new CancellationTokenSource()
+                    };
+                    DownloadManagerService.Instance.ActiveTasks.Add(_currentDownloadTask);
+
+                    await DownloadManagerService.Instance.EnqueueGameDownloadWithLoader(
+                        SelectedVersion, loaderChoice, loaderVersion, downloadSource);
+
+                    _currentDownloadTask.Status = "正在安装Forge...";
+                    DownloadStatus = "正在安装Forge...";
+
+                    await InstallForgeAsync(SelectedVersion.Id, loaderVersion);
+
+                    _currentDownloadTask.Status = "已完成";
+                    _currentDownloadTask.IsCompleted = true;
+                    _currentDownloadTask.Progress = 1.0;
+                    DownloadStatus = "下载并安装完成！";
+                }
+                else
+                {
+                    await DownloadManagerService.Instance.EnqueueGameDownloadWithLoader(
+                        SelectedVersion, loaderChoice, loaderVersion, downloadSource);
+
+                    DownloadStatus = "下载已加入队列";
+                }
+
                 DownloadProgress = 1.0;
+            }
+            catch (OperationCanceledException)
+            {
+                DownloadStatus = "已取消下载";
+                if (_currentDownloadTask != null)
+                {
+                    _currentDownloadTask.Status = "已取消";
+                    _currentDownloadTask.IsFailed = true;
+                }
             }
             catch (Exception ex)
             {
                 DownloadStatus = $"下载失败: {ex.Message}";
+                if (_currentDownloadTask != null)
+                {
+                    _currentDownloadTask.Status = "Failed";
+                    _currentDownloadTask.IsFailed = true;
+                    _currentDownloadTask.ErrorMessage = ex.Message;
+                }
             }
-            finally { IsDownloading = false; }
+            finally
+            {
+                IsDownloading = false;
+            }
+        }
+
+        private async Task InstallForgeAsync(string mcVersion, string forgeVersion)
+        {
+            if (_currentDownloadTask == null) return;
+
+            try
+            {
+                var mainVM = ((App)Application.Current).MainWindow.DataContext as MainViewModel;
+                string gamePath = mainVM?.ConfigService.Settings.GamePath ?? ".minecraft";
+
+                var progress = new Progress<double>(p =>
+                {
+                    if (_currentDownloadTask != null)
+                    {
+                        _currentDownloadTask.ComponentsProgress = p;
+                        _currentDownloadTask.ComponentsStatusText = $"安装中 {p * 100:F0}%";
+                    }
+                });
+
+                var status = new Progress<string>(s =>
+                {
+                    if (_currentDownloadTask != null)
+                    {
+                        _currentDownloadTask.ComponentsStatus = s;
+                    }
+                });
+
+                await _modLoaderService.InstallForgeAsync(mcVersion, forgeVersion, gamePath, progress, status);
+
+                if (_currentDownloadTask != null)
+                {
+                    _currentDownloadTask.ComponentsProgress = 1.0;
+                    _currentDownloadTask.ComponentsStatus = "已完成";
+                    _currentDownloadTask.ComponentsStatusText = "已完成";
+                }
+            }
+            catch (Exception ex)
+            {
+                if (_currentDownloadTask != null)
+                {
+                    _currentDownloadTask.ComponentsStatus = $"安装失败: {ex.Message}";
+                }
+                throw;
+            }
+        }
+
+        [RelayCommand]
+        private void PauseDownload()
+        {
+            if (_currentDownloadTask != null && !_currentDownloadTask.IsCompleted && !_currentDownloadTask.IsFailed)
+            {
+                _currentDownloadTask.Cts.Cancel();
+                _currentDownloadTask.Status = "已暂停";
+                DownloadStatus = "下载已暂停";
+            }
+        }
+
+        [RelayCommand]
+        private void CancelDownload()
+        {
+            if (_currentDownloadTask != null && !_currentDownloadTask.IsCompleted && !_currentDownloadTask.IsFailed)
+            {
+                _currentDownloadTask.Cts.Cancel();
+                _currentDownloadTask.Status = "已取消";
+                _currentDownloadTask.IsFailed = true;
+                DownloadStatus = "下载已取消";
+                IsDownloading = false;
+            }
         }
 
         [RelayCommand]

@@ -67,6 +67,9 @@ dotnet run
 
 - **v1.1.0** - UI 全面升级：统一颜色系统、毛玻璃效果、标准化圆角、修复 UI 崩溃问题
 
-## License
+## 鸣谢
 
-MIT License
+- [Modrinth](https://modrinth.com/) - 模组资源 API
+- [Microsoft](https://www.microsoft.com/) - 微软账号认证 API
+- [Mojang](https://www.minecraft.net/) - Minecraft 版本清单 API
+- [WPF-UI](https://github.com/lepoco/wpfui) - 现代化 WPF 控件库
